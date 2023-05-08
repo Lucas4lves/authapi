@@ -3,7 +3,7 @@ using AuthApi.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<UserDb>(o => o.UseInMemoryDatabase("Users"));
+builder.Services.AddDbContext<UserDb>(o => o.UseSqlServer("Data Source=localhost;Initial Catalog=auth;Persist Security Info=True;User ID=sa;Password=abcd.1234; Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"));
 builder.Services.AddCors();
 var app = builder.Build();
 
@@ -19,7 +19,9 @@ app.MapGet("/users/{id}", async (int id, UserDb db) =>
             return Results.NotFound();
         }
 
-        return Results.Ok(foundUser);
+        var response = new UserDTO(foundUser.Name, foundUser.Email);
+
+        return Results.Ok(response);
     });
 
 app.MapPost("/users/signup", async(User user, UserDb db) =>{
