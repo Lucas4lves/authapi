@@ -4,7 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<UserDb>(o => o.UseInMemoryDatabase("Users"));
+builder.Services.AddCors();
 var app = builder.Build();
+
+app.UseCors((option) => option.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
 
 app.MapGet("/users",async(UserDb db)=>
     await db.Users.ToListAsync());
