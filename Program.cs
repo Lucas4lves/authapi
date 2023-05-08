@@ -1,6 +1,7 @@
 using AuthApi.Models;
 using AuthApi.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<UserDb>(o => o.UseSqlServer("Data Source=localhost;Initial Catalog=auth;Persist Security Info=True;User ID=sa;Password=abcd.1234; Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"));
@@ -56,21 +57,26 @@ app.MapDelete("/users/{id}", async(int id, UserDb db) => {
 
 app.MapPost("/users/auth", async(User userInput, UserDb db) =>{
     var email = userInput.Email;
-    var pass = userInput.Password;
-    try{
+    var password = userInput.Password;
+
+    Console.WriteLine(email);
+    Console.WriteLine(password);
+
+    try
+    {
         var userByEmail = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
 
         if(userByEmail is null)
         {
-            return Results.BadRequest("Não há usuário cadastrado com esse E-mail!");
+            return Results.BadRequest(new { status = false, msg = "Não há usuário cadastrado com esse e-mail"});
         }
 
-        if(userByEmail.Password != pass)
+        if(userByEmail.Password != password)
         {
-            return Results.BadRequest("A senha está incorreta!");
+            return Results.BadRequest(new {status = false, msg = "A senha está incorreta!" });
         }
 
-        return Results.Ok("Usuário logado com sucesso!");
+        return Results.Ok(new {status = true, msg = "Usuário logado com sucesso!" });
 
     }catch(Exception e){
         Console.WriteLine(e.Message);
